@@ -5,24 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lumitechia - Gerenciador de Consultas</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="LogoLumi.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --glass-bg: rgba(22, 27, 34, 0.6);
+            --text-primary: #e2e8f0;
+            --text-secondary: #9ca3af;
+            --text-title: #3b82f6;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-bg: #1e293b;
+            --input-border: #334155;
+            --btn-bg: #1e293b;
+            --btn-border: #334155;
+            --btn-hover-bg: #334155;
+            --kanban-col-bg: rgba(30, 41, 59, 0.5);
+            --kanban-card-bg: #1e293b;
+            --fc-border-color: rgba(255, 255, 255, 0.2);
+            --fc-today-bg-color: rgba(59, 130, 246, 0.15);
+            --primary-blue: #0a192f;
+            --accent-orange: #ff6b35;
+            --electric-blue: #00d4ff;
+            --white: #ffffff;
+            --light-gray: #f0f6ff;
+            --dark-overlay: rgba(10, 25, 47, 0.9);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        .light-theme {
+            --bg-primary: #f1f5f9; /* slate-100 */
+            --bg-secondary: #ffffff; /* white */
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --text-primary: #0f172a; /* slate-900 */
+            --text-secondary: #475569; /* slate-600 */
+            --text-title: #1d4ed8; /* blue-700 */
+            --border-color: #e2e8f0; /* slate-200 */
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1; /* slate-300 */
+            --btn-bg: #f1f5f9;
+            --btn-border: #cbd5e1;
+            --btn-hover-bg: #e2e8f0; /* slate-200 */
+            --kanban-col-bg: #f1f5f9;
+            --kanban-card-bg: #ffffff;
+            --fc-border-color: #e2e8f0;
+            --fc-today-bg-color: rgba(37, 99, 235, 0.1); /* blue-600 with opacity */
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #0d1117;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .logo-futurista {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--white);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .logo-symbol {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--dark-overlay), var(--dark-overlay));
+            border-radius: 10px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px var(--accent-orange); }
+            to { box-shadow: 0 0 30px var(--electric-blue), 0 0 40px var(--electric-blue); }
         }
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
         }
         .glass-effect {
-            background: rgba(22, 27, 34, 0.6);
+            background: var(--glass-bg);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s, border-color 0.3s;
         }
         .glow-text {
             text-shadow: 0 0 5px rgba(59, 130, 246, 0.5), 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .light-theme .glow-text {
+            text-shadow: none;
         }
         .btn-glow {
             box-shadow: 0 0 5px rgba(37, 99, 235, 0.8), 0 0 10px rgba(37, 99, 235, 0.6);
@@ -58,70 +140,161 @@
             padding: 4px;
             border-radius: 50%;
             transition: background-color 0.2s;
+            color: var(--text-secondary);
         }
         .action-btn:hover {
-            background-color: rgba(255,255,255,0.1);
+            background-color: rgba(127, 127, 127, 0.1);
         }
-        /* Custom scrollbar for webkit browsers */
-        ::-webkit-scrollbar {
-            width: 8px;
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+        .light-theme ::-webkit-scrollbar-thumb { background: #cbd5e1; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a5568; }
+        .light-theme ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+
+        /* FullCalendar Customization */
+        .fc { color: var(--text-primary); }
+        .fc .fc-toolbar-title { font-size: 1.5em; font-family: 'Orbitron'; }
+        .fc .fc-button { background: var(--btn-bg) !important; border: 1px solid var(--btn-border) !important; color: var(--text-primary) !important; }
+        .fc .fc-button:hover { background: var(--btn-hover-bg) !important; }
+        .fc .fc-daygrid-day-number { color: var(--text-secondary); }
+        .fc-event { border-radius: 4px; padding: 2px 4px; }
+
+        /* Kanban Styles */
+        .kanban-column { min-width: 300px; width: 300px; background-color: var(--kanban-col-bg); border-radius: 8px; flex-shrink: 0;}
+        .kanban-column-header { padding: 12px; border-bottom: 1px solid var(--border-color); font-weight: bold; font-family: 'Orbitron'; }
+        .kanban-column[data-status="true"] .kanban-column-header { color: #10b981; }
+        .kanban-column[data-status="false"] .kanban-column-header { color: #ef4444; }
+        .kanban-cards { min-height: 200px; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+        .kanban-card { background: var(--kanban-card-bg); padding: 12px; border-radius: 6px; border-left: 3px solid #3b82f6; cursor: grab; }
+        .kanban-card:active { cursor: grabbing; }
+        .kanban-card .card-time { font-size: 0.75rem; color: var(--text-secondary); }
+        .kanban-card .card-tipo { font-size: 0.75rem; color: #2dd4bf; font-weight: 500; }
+        .kanban-card.dragging { opacity: 0.5; }
+
+        /* Input Styles */
+        .custom-input {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
         }
-        ::-webkit-scrollbar-track {
-            background: #0d1117;
+        .light-theme .custom-input option {
+            background-color: white;
+            color: black;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #2d3748;
-            border-radius: 4px;
+
+        .view-btn-inactive {
+            color: var(--text-secondary);
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4a5568;
+        .view-btn-inactive:hover {
+            background-color: var(--btn-hover-bg);
         }
+        
+        /* Responsive Calendar */
+        @media (max-width: 768px) {
+            .fc .fc-toolbar.fc-header-toolbar {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .fc .fc-toolbar-title {
+                font-size: 1.2rem;
+                order: -1;
+            }
+        }
+
     </style>
 </head>
-<body class="bg-slate-900 text-gray-200">
+<body>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-full">
-        <header class="flex items-center gap-4 mb-10">
-            <svg class="w-10 h-10 text-blue-400 glow-text" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2ZM12 4.53L19.5 8.5V15.5L12 19.47L4.5 15.5V8.5L12 4.53Z" fill="currentColor"/><path d="M12 14L15 15.5V12.5L12 11L9 12.5V15.5L12 14Z" fill="currentColor" fill-opacity="0.6"/></svg>
-            <h1 class="text-3xl sm:text-4xl font-bold font-orbitron glow-text text-white">Lumitechia</h1>
+        <header class="flex items-center justify-between gap-4 mb-10">
+            <div class="flex items-center gap-4">
+                <div class="logo-symbol">
+                <img src="LogoLumi.png" alt="Logo Lumitech" style="width: 38px; height: 38px; object-fit: contain; position: absolute; left: 6px; top: 6px; z-index: 2; pointer-events: none;" />
+               </div>
+                <h1 class="text-3xl sm:text-4xl font-bold font-orbitron glow-text">Lumitechia</h1>
+            </div>
+            <button id="themeToggleBtn" class="action-btn p-2 rounded-full" title="Alternar tema">
+                <svg id="theme-icon-sun" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="theme-icon-moon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
         </header>
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Coluna do Chat -->
             <div class="lg:col-span-1">
-                <div class="glass-effect rounded-lg shadow-2xl h-[80vh] overflow-hidden">
-                     <iframe src="https://n8n.lumitechia.com.br/webhook/b74df918-9089-4372-bb52-7cf2a2108f75/chat" class="w-full h-full border-0"></iframe>
+                <div class="glass-effect rounded-lg shadow-2xl h-[80vh] min-h-[500px] overflow-hidden relative">
+                     <iframe id="chatIframe" src="https://n8n.lumitechia.com.br/webhook/b74df918-9089-4372-bb52-7cf2a2108f75/chat" class="w-full h-full border-0"></iframe>
+                     <button id="resetChatButton" class="absolute top-4 right-4 z-10 action-btn bg-slate-900/50" title="Reiniciar Chat">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
             <!-- Coluna da Tabela -->
             <div class="lg:col-span-2">
-                <div class="glass-effect p-6 rounded-lg shadow-2xl">
-                    <div class="flex justify-between items-center mb-5">
-                        <h2 class="text-2xl font-semibold text-blue-300 font-orbitron">Consultas Agendadas</h2>
-                        <button id="refreshButton" class="action-btn text-slate-400 hover:text-blue-400" title="Atualizar lista">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
-                                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
-                            </svg>
-                        </button>
+                <div class="glass-effect p-4 sm:p-6 rounded-lg shadow-2xl">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4">
+                        <h2 class="text-2xl font-semibold font-orbitron flex-shrink-0" style="color: var(--text-title);">Consultas Agendadas</h2>
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 p-1 rounded-md flex-shrink-0" style="background-color: var(--btn-bg);">
+                                <button id="viewListBtn" class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white">Lista</button>
+                                <button id="viewCalendarBtn" class="px-3 py-1 text-sm rounded-md view-btn-inactive">Calendário</button>
+                                <button id="viewKanbanBtn" class="px-3 py-1 text-sm rounded-md view-btn-inactive">Kanban</button>
+                            </div>
+                            <button id="refreshButton" class="action-btn p-2 rounded-full" title="Atualizar lista">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead class="border-b border-slate-700">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Nome</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Data</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Horário</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Telefone</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Confirmada</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="agendamentosList">
-                                <tr><td colspan="6" class="p-4 text-center text-slate-400">Carregando...</td></tr>
-                            </tbody>
-                        </table>
+                    
+                    <!-- Filtros -->
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap items-center gap-2 w-full mb-5">
+                        <div class="flex w-full sm:w-auto items-center gap-2">
+                            <input type="date" id="filterStartDate" class="custom-input rounded-md px-3 py-1.5 text-sm w-full">
+                            <span class="text-slate-400 hidden sm:inline">até</span>
+                            <input type="date" id="filterEndDate" class="custom-input rounded-md px-3 py-1.5 text-sm w-full">
+                        </div>
+                        <div class="flex w-full sm:w-auto items-center gap-2">
+                            <select id="filterStatus" class="custom-input rounded-md px-3 py-1.5 text-sm w-full">
+                                <option value="todos">Todos Status</option>
+                                <option value="true">Confirmada</option>
+                                <option value="false">Não Confirmada</option>
+                            </select>
+                            <select id="filterTipo" class="custom-input rounded-md px-3 py-1.5 text-sm w-full">
+                                <option value="todos">Todos os Tipos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Views Container -->
+                    <div id="viewsContainer">
+                        <div id="listView">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead class="border-b" style="border-color: var(--border-color);">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Nome</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Data</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Horário</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Telefone</th>
+                                            <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Confirmada</th>
+                                            <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="agendamentosList">
+                                        <tr><td colspan="6" class="p-4 text-center" style="color: var(--text-secondary);">Carregando...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="calendarView" class="hidden"></div>
+                        <div id="kanbanView" class="hidden flex gap-4 overflow-x-auto pb-4"></div>
                     </div>
                 </div>
             </div>
@@ -131,15 +304,22 @@
     <!-- Modal de Edição (oculto por padrão) -->
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center hidden z-50">
         <div class="glass-effect p-8 rounded-lg shadow-2xl w-full max-w-md">
-            <h2 class="text-2xl font-semibold mb-5 text-blue-300 font-orbitron">Editar Agendamento</h2>
+            <h2 class="text-2xl font-semibold mb-5 font-orbitron" style="color: var(--text-title);">Editar Agendamento</h2>
             <form id="editAgendamentoForm" class="space-y-4">
                 <input type="hidden" id="edit-id" name="id">
-                <input type="text" id="edit-nome" name="nome" required placeholder="Nome" class="mt-1 block w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                <input type="date" id="edit-data" name="data" required class="mt-1 block w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-md shadow-sm text-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                <input type="time" id="edit-horario" name="horario" required class="mt-1 block w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-md shadow-sm text-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                <input type="tel" id="edit-telefone" name="telefone" required placeholder="Telefone" class="mt-1 block w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="text" id="edit-nome" name="nome" required placeholder="Nome" class="custom-input mt-1 block w-full px-4 py-2 rounded-md shadow-sm sm:text-sm">
+                <input type="date" id="edit-data" name="data" required class="custom-input mt-1 block w-full px-4 py-2 rounded-md shadow-sm sm:text-sm">
+                <input type="time" id="edit-horario" name="horario" required class="custom-input mt-1 block w-full px-4 py-2 rounded-md shadow-sm sm:text-sm">
+                <input type="tel" id="edit-telefone" name="telefone" required placeholder="Telefone" class="custom-input mt-1 block w-full px-4 py-2 rounded-md shadow-sm sm:text-sm">
+                <select id="edit-tipo" name="tipo" class="custom-input mt-1 block w-full px-4 py-2 rounded-md shadow-sm sm:text-sm">
+                    <option value="Limpeza">Limpeza</option>
+                    <option value="Canal">Canal</option>
+                    <option value="Emergência">Emergência</option>
+                    <option value="Ortondontia">Ortondontia</option>
+                    <option value="Outros">Outros</option>
+                </select>
                 <div class="flex gap-4 pt-4">
-                    <button type="button" id="cancelEdit" class="w-full flex justify-center py-2 px-4 border border-slate-600 rounded-md shadow-sm text-sm font-medium text-slate-300 hover:bg-slate-700 focus:outline-none">Cancelar</button>
+                    <button type="button" id="cancelEdit" class="w-full flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium focus:outline-none" style="border-color: var(--input-border); color: var(--text-primary); background-color: var(--btn-bg); ">Cancelar</button>
                     <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none btn-glow">Salvar Alterações</button>
                 </div>
             </form>
@@ -150,9 +330,9 @@
     <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center hidden z-50">
         <div class="glass-effect p-8 rounded-lg shadow-2xl w-full max-w-md text-center">
             <h2 class="text-2xl font-semibold mb-5 text-yellow-300 font-orbitron">Confirmar Exclusão</h2>
-            <p class="mb-6 text-slate-300">Tem certeza de que deseja apagar este agendamento? Esta ação não pode ser desfeita.</p>
+            <p class="mb-6">Tem certeza de que deseja apagar este agendamento? Esta ação não pode ser desfeita.</p>
             <div class="flex gap-4 pt-4">
-                <button type="button" id="cancelDelete" class="w-full flex justify-center py-2 px-4 border border-slate-600 rounded-md shadow-sm text-sm font-medium text-slate-300 hover:bg-slate-700 focus:outline-none">Cancelar</button>
+                <button type="button" id="cancelDelete" class="w-full flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium focus:outline-none" style="border-color: var(--input-border); color: var(--text-primary); background-color: var(--btn-bg);">Cancelar</button>
                 <button type="button" id="confirmDelete" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none btn-glow">Apagar</button>
             </div>
         </div>
@@ -162,14 +342,16 @@
         // --- NocoDB Configuration ---
         const NOCODB_URL = 'https://lumitechia-nocodb.aeenwc.easypanel.host';
         const API_TOKEN = 'zMt0wvkPgjwqi3ae5Y4ZhhPE0wsX9HBvEYAmNtCS';
-        const PROJECT_NAME = 'Portfolio';
+        const PROJECT_NAME = 'Portfolio'; 
         const TABLE_NAME = 'Agendamentos';
         const API_ENDPOINT = `${NOCODB_URL}/api/v1/db/data/noco/${PROJECT_NAME}/${TABLE_NAME}`;
 
-        const headers = {
-            'Content-Type': 'application/json',
-            'xc-token': API_TOKEN
-        };
+        const headers = { 'Content-Type': 'application/json', 'xc-token': API_TOKEN };
+
+        // --- State ---
+        let allAgendamentos = [];
+        let currentView = 'list'; // 'list', 'calendar', 'kanban'
+        let calendar;
 
         // --- UI Elements ---
         const agendamentosList = document.getElementById('agendamentosList');
@@ -180,6 +362,42 @@
         const cancelDeleteBtn = document.getElementById('cancelDelete');
         const confirmDeleteBtn = document.getElementById('confirmDelete');
         const refreshButton = document.getElementById('refreshButton');
+        const resetChatButton = document.getElementById('resetChatButton');
+        const chatIframe = document.getElementById('chatIframe');
+        const viewListBtn = document.getElementById('viewListBtn');
+        const viewCalendarBtn = document.getElementById('viewCalendarBtn');
+        const viewKanbanBtn = document.getElementById('viewKanbanBtn');
+        const listView = document.getElementById('listView');
+        const calendarView = document.getElementById('calendarView');
+        const kanbanView = document.getElementById('kanbanView');
+        const filterStartDate = document.getElementById('filterStartDate');
+        const filterEndDate = document.getElementById('filterEndDate');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterTipo = document.getElementById('filterTipo');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const sunIcon = document.getElementById('theme-icon-sun');
+        const moonIcon = document.getElementById('theme-icon-moon');
+
+
+        // --- Theme Management ---
+        const applyTheme = (theme) => {
+            if (theme === 'light') {
+                document.documentElement.classList.add('light-theme');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('light-theme');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            localStorage.setItem('theme', theme);
+        };
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
 
         // --- Utility Functions ---
         function formatDate(isoDate) {
@@ -187,152 +405,449 @@
             const date = new Date(isoDate.slice(0, 10) + 'T12:00:00Z');
             return new Intl.DateTimeFormat('pt-BR').format(date);
         }
+        
+        function formatPhoneNumber(phone) {
+            if (!phone) return 'N/A';
+            const cleaned = ('' + phone).replace(/\D/g, '');
+            if (cleaned.length === 11) {
+                 const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
+                 if (match) return `(${match[1]}) ${match[2]}-${match[3]}`;
+            }
+            if (cleaned.length === 10) {
+                const match = cleaned.match(/^(\d{2})(\d{4})(\d{4})$/);
+                if (match) return `(${match[1]}) ${match[2]}-${match[3]}`;
+            }
+            return phone;
+        }
 
-        // --- Render Function ---
-        function renderAgendamentos(agendamentos) {
-            agendamentosList.innerHTML = '';
-            if (!agendamentos || agendamentos.length === 0) {
-                agendamentosList.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Nenhum agendamento encontrado.</td></tr>`;
-                return;
+        function applyFiltersAndRender() {
+            let filtered = [...allAgendamentos];
+
+            const startDate = filterStartDate.value ? new Date(filterStartDate.value + 'T00:00:00Z') : null;
+            const endDate = filterEndDate.value ? new Date(filterEndDate.value + 'T23:59:59Z') : null;
+
+            if (startDate) {
+                filtered = filtered.filter(item => {
+                    if (!item.data) return false;
+                    const itemDate = new Date(item.data);
+                    return itemDate >= startDate;
+                });
+            }
+            if (endDate) {
+                 filtered = filtered.filter(item => {
+                    if (!item.data) return false;
+                    const itemDate = new Date(item.data);
+                    return itemDate <= endDate;
+                });
             }
 
+            if (filterStatus.value !== 'todos') {
+                const status = filterStatus.value === 'true';
+                filtered = filtered.filter(item => !!item.status === status);
+            }
+
+            if (filterTipo.value !== 'todos') {
+                filtered = filtered.filter(item => item.tipo === filterTipo.value);
+            }
+
+            renderCurrentView(filtered);
+        }
+
+        function renderCurrentView(data) {
+            switch (currentView) {
+                case 'list': renderListView(data); break;
+                case 'calendar': renderCalendarView(data); break;
+                case 'kanban': renderKanbanView(data); break;
+            }
+        }
+        
+        function populateTipoFilter() {
+            const tipos = [...new Set(allAgendamentos.map(item => item.tipo).filter(Boolean))];
+            filterTipo.innerHTML = '<option value="todos">Todos os Tipos</option>';
+            tipos.forEach(tipo => {
+                const option = document.createElement('option');
+                option.value = tipo;
+                option.textContent = tipo;
+                filterTipo.appendChild(option);
+            });
+        }
+        
+        // --- Render Functions ---
+        function renderListView(agendamentos) {
+            agendamentosList.innerHTML = '';
+            if (!agendamentos || agendamentos.length === 0) {
+                agendamentosList.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Nenhum agendamento encontrado.</td></tr>`;
+                return;
+            }
             agendamentos.forEach(item => {
                 const row = document.createElement('tr');
-                row.className = "border-b border-slate-800 hover:bg-slate-800/50 transition-colors";
+                row.className = "border-b";
+                row.style.borderColor = 'var(--border-color)';
                 row.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">${item.Nome || 'N/A'}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-300">${formatDate(item.Data)}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-300">${item.Horario ? item.Horario.slice(0, 5) : 'N/A'}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-300">${item.Telefone || 'N/A'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">${item.nome || 'N/A'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm" style="color: var(--text-secondary);">${formatDate(item.data)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm" style="color: var(--text-secondary);">${item.horario ? item.horario.slice(0, 5) : 'N/A'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm" style="color: var(--text-secondary);">
+                        <div class="flex items-center gap-2">
+                            <span>${formatPhoneNumber(item.telefone)}</span>
+                            ${item.telefone ? `<a href="https://wa.me/55${(item.telefone || '').replace(/\D/g, '')}" target="_blank" class="action-btn text-green-400" title="Abrir no WhatsApp">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+                            </a>` : ''}
+                        </div>
+                    </td>
                     <td class="px-4 py-3 whitespace-nowrap text-center">
-                        <button class="status-btn" data-id="${item.Id}" data-status="${!!item.Status}" title="Clique para alterar">
-                            ${!!item.Status 
-                                ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg>' 
-                                : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>'}
+                        <button class="status-btn" data-id="${item.Id}" data-status="${!!item.status}" title="Clique para alterar">
+                            ${!!item.status ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>'}
                         </button>
                     </td>
                     <td class="px-4 py-3 whitespace-nowrap text-center text-sm font-medium">
                        <div class="flex items-center justify-center gap-2">
-                            <button class="action-btn edit-btn text-blue-400" data-id="${item.Id}" title="Editar">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V12h2.293z"/></svg>
-                            </button>
-                            <button class="action-btn delete-btn text-red-400" data-id="${item.Id}" title="Apagar">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
-                            </button>
+                            <button class="action-btn edit-btn" data-item='${JSON.stringify(item)}' title="Editar"><svg class="pointer-events-none text-blue-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V12h2.293z"/></svg></button>
+                            <button class="action-btn delete-btn" data-id="${item.Id}" title="Apagar"><svg class="pointer-events-none text-red-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg></button>
                        </div>
-                    </td>
-                `;
-                row.querySelector('.edit-btn').dataset.item = JSON.stringify(item);
+                    </td>`;
                 agendamentosList.appendChild(row);
             });
         }
+        
+        function renderCalendarView(agendamentos) {
+            const calendarEvents = agendamentos.map(item => ({
+                id: item.Id,
+                title: `${item.nome} - ${item.tipo || 'Sem Tipo'}`,
+                start: `${item.data.slice(0,10)}T${item.horario || '00:00:00'}`,
+                backgroundColor: !!item.status ? '#10B981' : '#EF4444',
+                borderColor: !!item.status ? '#059669' : '#DC2626',
+                extendedProps: { itemData: item }
+            }));
+
+            if (calendar) {
+                calendar.destroy();
+            }
+            calendar = new FullCalendar.Calendar(calendarView, {
+                initialView: 'dayGridMonth',
+                locale: 'pt-br',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                events: calendarEvents,
+                eventClick: (info) => {
+                    openEditModal(info.event.extendedProps.itemData);
+                }
+            });
+            calendar.render();
+        }
+
+        function renderKanbanView(agendamentos) {
+            kanbanView.innerHTML = '';
+            const statuses = [
+                { title: 'Não Confirmada', value: false },
+                { title: 'Confirmada', value: true }
+            ];
+
+            statuses.forEach(statusInfo => {
+                const column = document.createElement('div');
+                column.className = 'kanban-column';
+                column.dataset.status = statusInfo.value;
+                column.innerHTML = `<div class="kanban-column-header">${statusInfo.title}</div><div class="kanban-cards"></div>`;
+                kanbanView.appendChild(column);
+                
+                column.addEventListener('dragover', e => e.preventDefault());
+                column.addEventListener('drop', handleKanbanDrop);
+            });
+            
+            agendamentos.forEach(item => {
+                const column = kanbanView.querySelector(`.kanban-column[data-status="${!!item.status}"] .kanban-cards`);
+                if(column) {
+                    const card = document.createElement('div');
+                    card.className = 'kanban-card';
+                    card.id = `card-${item.Id}`;
+                    card.dataset.id = item.Id;
+                    card.draggable = true;
+                    card.innerHTML = `
+                        <p class="font-bold">${item.nome}</p>
+                        <p class="card-time">${formatDate(item.data)} - ${item.horario ? item.horario.slice(0,5) : ''}</p>
+                        <p class="card-tipo">${item.tipo || 'Sem Tipo'}</p>
+                    `;
+                    card.addEventListener('dragstart', e => {
+                        e.dataTransfer.setData('text/plain', e.target.id);
+                        setTimeout(() => e.target.classList.add('dragging'), 0);
+                    });
+                    card.addEventListener('dragend', e => e.target.classList.remove('dragging'));
+                    
+                    // Touch events for mobile drag & drop
+                    card.addEventListener('touchstart', handleTouchStart, { passive: false });
+                    card.addEventListener('touchmove', handleTouchMove, { passive: false });
+                    card.addEventListener('touchend', handleTouchEnd);
+
+                    column.appendChild(card);
+                }
+            });
+        }
+
 
         // --- API Functions (CRUD) ---
         async function fetchAgendamentos() {
-            agendamentosList.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Atualizando...</td></tr>`;
+            agendamentosList.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Atualizando...</td></tr>`;
             try {
-                const response = await fetch(`${API_ENDPOINT}?sort=-CreatedAt`, { headers });
+                const response = await fetch(`${API_ENDPOINT}?sort=-Id`, { headers });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
-                renderAgendamentos(data.list);
+                
+                allAgendamentos = (data.list || []).map(item => ({
+                    Id: item.Id,
+                    nome: item.nome,
+                    data: item.data,
+                    horario: item.horario,
+                    telefone: item.telefone,
+                    tipo: item.tipo,
+                    status: !!item.status
+                }));
+
+                populateTipoFilter();
+                applyFiltersAndRender();
             } catch (error) {
                 console.error("Erro ao buscar agendamentos:", error);
-                agendamentosList.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500">Falha ao carregar dados. Verifique a URL e o Token da API.</td></tr>`;
+                agendamentosList.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500">Falha ao carregar dados. Verifique a URL, Token, e os nomes do Projeto/Tabela.</td></tr>`;
             }
         }
         
-        editForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(editForm);
-            const id = formData.get('id');
-            const rawDate = formData.get('data');
-            const utcDate = new Date(rawDate + 'T12:00:00Z');
-
-            const updateData = {
-                Nome: formData.get('nome'),
-                Data: utcDate.toISOString(),
-                Horario: formData.get('horario'),
-                Telefone: formData.get('telefone'),
-            };
-            
+        async function patchAgendamento(id, updateData) {
             try {
+                const dataToSend = { ...updateData };
+                if (dataToSend.hasOwnProperty('status')) {
+                    // Send boolean directly, as the database likely expects it.
+                    dataToSend.status = !!dataToSend.status;
+                }
+
                 const response = await fetch(`${API_ENDPOINT}/${id}`, {
                     method: 'PATCH',
-                    headers: headers,
-                    body: JSON.stringify(updateData)
+                    headers,
+                    body: JSON.stringify(dataToSend) 
                 });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                editModal.classList.add('hidden');
-                fetchAgendamentos();
+                
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    console.error('Erro response body:', errorBody);
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorBody}`);
+                }
+                
+                const updatedItemIndex = allAgendamentos.findIndex(item => item.Id === id);
+                if(updatedItemIndex > -1) {
+                    allAgendamentos[updatedItemIndex] = { ...allAgendamentos[updatedItemIndex], ...updateData };
+                }
+                applyFiltersAndRender();
+
             } catch (error) {
                 console.error("Erro ao atualizar:", error);
-                alert("Falha ao atualizar agendamento.");
+                alert("Falha ao atualizar agendamento: " + error.message);
+                await fetchAgendamentos();
             }
-        });
+        }
+        
+        async function handleKanbanDrop(e) {
+            e.preventDefault();
+            const cardId = e.dataTransfer.getData('text/plain');
+            const cardElement = document.getElementById(cardId);
+            if(!cardElement) return;
 
-        confirmDeleteBtn.addEventListener('click', async () => {
-            const id = confirmDeleteBtn.dataset.id;
-            if (id) {
-                try {
-                    const response = await fetch(`${API_ENDPOINT}/${id}`, {
-                        method: 'DELETE',
-                        headers: headers
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    deleteModal.classList.add('hidden');
-                    fetchAgendamentos();
-                } catch (error) {
-                    console.error("Erro ao apagar:", error);
-                    alert("Falha ao apagar agendamento.");
+            const agendamentoId = parseInt(cardElement.dataset.id, 10);
+            const targetColumn = e.target.closest('.kanban-column');
+            if (!targetColumn) return;
+            
+            const newStatus = targetColumn.dataset.status === 'true';
+            
+            const originalColumn = cardElement.parentElement.closest('.kanban-column');
+            if (originalColumn.dataset.status !== targetColumn.dataset.status) {
+                targetColumn.querySelector('.kanban-cards').appendChild(cardElement);
+                await patchAgendamento(agendamentoId, { status: newStatus });
+            }
+        }
+        
+        function openEditModal(itemData) {
+            editForm.id.value = itemData.Id;
+            editForm.nome.value = itemData.nome || '';
+            editForm.data.value = itemData.data ? itemData.data.slice(0, 10) : '';
+            editForm.horario.value = itemData.horario ? itemData.horario.slice(0, 5) : '';
+            editForm.telefone.value = itemData.telefone || '';
+            editForm.tipo.value = itemData.tipo || 'Outros';
+            editModal.classList.remove('hidden');
+        }
+
+        // --- Touch Drag & Drop for Kanban ---
+        let touchDraggingCard = null;
+        let touchGhostElement = null;
+        let touchOffsetX = 0;
+        let touchOffsetY = 0;
+
+        function handleTouchStart(e) {
+            if (e.touches.length !== 1) return;
+            const card = e.currentTarget;
+            touchDraggingCard = card;
+
+            const rect = card.getBoundingClientRect();
+            touchOffsetX = e.touches[0].clientX - rect.left;
+            touchOffsetY = e.touches[0].clientY - rect.top;
+
+            touchGhostElement = card.cloneNode(true);
+            touchGhostElement.style.position = 'fixed'; // Use fixed to avoid scroll issues
+            touchGhostElement.style.zIndex = '1000';
+            touchGhostElement.style.opacity = '0.8';
+            touchGhostElement.style.pointerEvents = 'none';
+            touchGhostElement.style.width = `${rect.width}px`;
+            touchGhostElement.style.height = `${rect.height}px`;
+            touchGhostElement.style.left = `${e.touches[0].clientX - touchOffsetX}px`;
+            touchGhostElement.style.top = `${e.touches[0].clientY - touchOffsetY}px`;
+
+            document.body.appendChild(touchGhostElement);
+            card.style.opacity = '0.4';
+        }
+
+        function handleTouchMove(e) {
+            if (!touchDraggingCard || e.touches.length !== 1) return;
+            // Prevent scrolling while dragging
+            e.preventDefault(); 
+
+            const touch = e.touches[0];
+            touchGhostElement.style.left = `${touch.clientX - touchOffsetX}px`;
+            touchGhostElement.style.top = `${touch.clientY - touchOffsetY}px`;
+        }
+
+        async function handleTouchEnd(e) {
+            if (!touchDraggingCard) return;
+
+            const ghostRect = touchGhostElement.getBoundingClientRect();
+            const endX = ghostRect.left + (ghostRect.width / 2);
+            const endY = ghostRect.top + (ghostRect.height / 2);
+            
+            touchGhostElement.style.visibility = 'hidden';
+            const endElement = document.elementFromPoint(endX, endY);
+            touchGhostElement.style.visibility = 'visible';
+            
+            document.body.removeChild(touchGhostElement);
+            touchDraggingCard.style.opacity = '1';
+
+            const targetColumn = endElement ? endElement.closest('.kanban-column') : null;
+
+            if (targetColumn) {
+                const agendamentoId = parseInt(touchDraggingCard.dataset.id, 10);
+                const newStatus = targetColumn.dataset.status === 'true';
+                const originalColumn = touchDraggingCard.closest('.kanban-column');
+                
+                if (originalColumn && originalColumn.dataset.status !== newStatus.toString()) {
+                    await patchAgendamento(agendamentoId, { status: newStatus });
                 }
             }
-        });
+            
+            touchDraggingCard = null;
+            touchGhostElement = null;
+        }
 
-        // --- Event Listeners for UI ---
+
+        // --- Event Listeners ---
+        function switchView(viewName) {
+            currentView = viewName;
+            
+            listView.classList.toggle('hidden', viewName !== 'list');
+            calendarView.classList.toggle('hidden', viewName !== 'calendar');
+
+            if (viewName === 'kanban') {
+                kanbanView.classList.remove('hidden');
+                kanbanView.classList.add('flex');
+            } else {
+                kanbanView.classList.add('hidden');
+                kanbanView.classList.remove('flex');
+            }
+            
+            [viewListBtn, viewCalendarBtn, viewKanbanBtn].forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white');
+                b.classList.add('view-btn-inactive');
+            });
+            
+            const activeBtn = document.getElementById(`view${viewName.charAt(0).toUpperCase() + viewName.slice(1)}Btn`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-blue-600', 'text-white');
+                activeBtn.classList.remove('view-btn-inactive');
+            }
+
+            applyFiltersAndRender();
+        }
+
+        viewListBtn.addEventListener('click', () => switchView('list'));
+        viewCalendarBtn.addEventListener('click', () => switchView('calendar'));
+        viewKanbanBtn.addEventListener('click', () => switchView('kanban'));
+        
+        [filterStartDate, filterEndDate, filterStatus, filterTipo].forEach(el => el.addEventListener('change', applyFiltersAndRender));
+
         agendamentosList.addEventListener('click', async (e) => {
             const button = e.target.closest('button');
             if (!button) return;
             
-            const id = button.dataset.id;
-
             if (button.classList.contains('delete-btn')) {
-                confirmDeleteBtn.dataset.id = id;
+                confirmDeleteBtn.dataset.id = button.dataset.id;
                 deleteModal.classList.remove('hidden');
+            } else if (button.classList.contains('edit-btn')) {
+                openEditModal(JSON.parse(button.dataset.item));
+            } else if (button.classList.contains('status-btn')) {
+                const id = parseInt(button.dataset.id, 10);
+                const newStatus = !(button.dataset.status === 'true');
+                await patchAgendamento(id, { status: newStatus });
             }
+        });
 
-            if (button.classList.contains('edit-btn')) {
-                const itemData = JSON.parse(button.dataset.item);
-                editForm.id.value = itemData.Id;
-                editForm.nome.value = itemData.Nome;
-                editForm.data.value = itemData.Data ? itemData.Data.slice(0, 10) : '';
-                editForm.horario.value = itemData.Horario ? itemData.Horario.slice(0, 5) : '';
-                editForm.telefone.value = itemData.Telefone;
-                editModal.classList.remove('hidden');
-            }
-            
-            if (button.classList.contains('status-btn')) {
-                const currentStatus = button.dataset.status === 'true';
-                const newStatus = !currentStatus;
-                 try {
-                    const response = await fetch(`${API_ENDPOINT}/${id}`, {
-                        method: 'PATCH',
-                        headers: headers,
-                        body: JSON.stringify({ Status: newStatus })
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(editForm);
+            const id = parseInt(formData.get('id'), 10);
+            const updateData = {
+                nome: formData.get('nome'),
+                data: formData.get('data'),
+                horario: formData.get('horario'),
+                telefone: formData.get('telefone'),
+                tipo: formData.get('tipo'),
+            };
+            editModal.classList.add('hidden');
+            await patchAgendamento(id, updateData);
+        });
+
+        confirmDeleteBtn.addEventListener('click', async () => {
+            const id = parseInt(confirmDeleteBtn.dataset.id, 10);
+            if (id) {
+                try {
+                    const response = await fetch(`${API_ENDPOINT}/${id}`, { 
+                        method: 'DELETE', 
+                        headers
                     });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    fetchAgendamentos();
+                     if (!response.ok) {
+                        const errorBody = await response.text();
+                        console.error('Erro response body:', errorBody);
+                        throw new Error(`HTTP error! status: ${response.status} - ${errorBody}`);
+                    }
+                    deleteModal.classList.add('hidden');
+                    
+                    allAgendamentos = allAgendamentos.filter(item => item.Id !== id);
+                    applyFiltersAndRender();
+
                 } catch (error) {
-                    console.error("Erro ao alterar status:", error);
-                    alert("Falha ao alterar status.");
+                    console.error("Erro ao apagar:", error);
+                    alert("Falha ao apagar agendamento: " + error.message);
                 }
             }
         });
 
         cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
         cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
-        refreshButton.addEventListener('click', fetchAgendamentos);
+        
+        refreshButton.addEventListener('click', () => {
+            filterStartDate.value = '';
+            filterEndDate.value = '';
+            filterStatus.value = 'todos';
+            filterTipo.value = 'todos';
+            fetchAgendamentos();
+        });
+
+        resetChatButton.addEventListener('click', () => { chatIframe.src = chatIframe.src; });
 
         // --- Initial Load ---
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
         fetchAgendamentos();
     </script>
 </body>
