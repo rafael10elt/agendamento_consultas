@@ -523,6 +523,12 @@
                 initialView: 'dayGridMonth',
                 locale: 'pt-br',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                buttonText: {
+                    today: 'Hoje',
+                    month: 'Mês',
+                    week: 'Semana',
+                    day: 'Dia',
+                },
                 events: calendarEvents,
                 eventClick: (info) => {
                     openEditModal(info.event.extendedProps.itemData);
